@@ -1,0 +1,138 @@
+Sub stock_information()
+
+    Dim ticker As String
+    Dim i As Long
+    Dim sh As Worksheet
+    Dim Table_Row As Integer
+    Dim volume As Double
+    Dim opening_price As Double
+    Dim closing_price As Double
+    Dim yearly_change As Currency
+    Dim percent_change As Double
+    Dim start As Long
+    Dim find_value As Long
+    Dim last_row As Long
+        
+   
+  For Each sh In Worksheets
+    sh.Range("i1").Value = "Ticker"
+    sh.Range("J1").Value = "Yearly Change"
+    sh.Range("K1").Value = "Percent Change"
+    sh.Range("L1").Value = "Total Stock Volume"
+    sh.Range("N2").Value = "Greatest % Increase"
+    sh.Range("N3").Value = "Greatest % Decrease"
+    sh.Range("N4").Value = "Greatest Total Volume"
+    sh.Range("O1").Value = "Ticker"
+    sh.Range("P1").Value = "Value"
+    
+    sh.Activate
+    Table_Row = 2
+    volume = 0
+    start = 2
+    opening_price = Cells(2, 3).Value
+    last_row = Cells(Rows.Count, 1).End(xlUp).Row
+  
+        For i = 2 To (sh.Cells(Rows.Count, 2).End(xlUp).Row)
+  
+            If Cells(i + 1, 1).Value <> Cells(i, 1).Value Then
+    
+                ticker = Cells(i, 1).Value
+                volume = volume + Cells(i, 7).Value
+                        
+                closing_price = Cells(i, 6).Value
+                
+                If volume = 0 Then
+                    Range("I" & Table_Row).Value = ticker
+                    Range("L" & Table_Row).Value = 0
+                    Range("J" & Table_Row).Value = 0
+                    Range("K" & Table_Row).Value = 0
+                   
+                Else
+                
+                    If Cells(start, 3) = 0 Then
+                     For find_value = start To i
+                       If Cells(find_value, 3).Value <> 0 Then
+                          start = find_value
+                          Exit For
+                        End If
+                    Next find_value
+                    End If
+             
+                opening_price = Cells(start, 3).Value
+                yearly_change = closing_price - opening_price
+                percent_change = yearly_change / opening_price
+                
+                start = i + 1
+                                                   
+                
+                    
+                Range("I" & Table_Row).Value = ticker
+                
+                Range("L" & Table_Row).Value = volume
+                            Range("L" & Table_Row).Select
+                            Selection.Style = "Comma"
+                            Selection.NumberFormat = "_(* #,##0.0_);_(* (#,##0.0);_(* ""-""??_);_(@_)"
+                            Selection.NumberFormat = "_(* #,##0_);_(* (#,##0);_(* ""-""??_);_(@_)"
+                
+                Range("J" & Table_Row).Value = yearly_change
+                            If Range("J" & Table_Row).Value > 0 Then
+                                Range("J" & Table_Row).Interior.Color = VBA.ColorConstants.vbGreen
+                            ElseIf Range("J" & Table_Row).Value < 0 Then
+                                Range("J" & Table_Row).Interior.Color = VBA.ColorConstants.vbRed
+                                                      
+                            End If
+                                    
+                          
+                                                                                                    
+                
+                Range("K" & Table_Row).Value = percent_change
+                            Range("K" & Table_Row).Select
+                            Selection.Style = "Percent"
+                            Selection.NumberFormat = "0.0%"
+                            Selection.NumberFormat = "0.00%"
+    
+                
+            End If
+            
+                Table_Row = Table_Row + 1
+                volume = 0
+                
+                Else
+                volume = volume + Cells(i, 7).Value
+            
+            End If
+            
+               
+    
+        Next i
+        
+            Range("P2").Value = WorksheetFunction.Max(Range("K1", "K" & last_row))
+                            Range("P2").Select
+                                Selection.Style = "Percent"
+                                Selection.NumberFormat = "0.0%"
+                                Selection.NumberFormat = "0.00%"
+                                
+            Range("o2").Value = WorksheetFunction.XLookup(Range("P2"), Range("K1:k" & last_row), Range("i1:i" & last_row))
+            
+
+            Range("P3").Value = WorksheetFunction.Min(Range("K1", "K" & last_row))
+                            Range("P3").Select
+                                Selection.Style = "Percent"
+                                Selection.NumberFormat = "0.0%"
+                                Selection.NumberFormat = "0.00%"
+                            
+            Range("o3").Value = WorksheetFunction.XLookup(Range("P3"), Range("K1:k" & last_row), Range("i1:i" & last_row))
+
+
+            Range("P4").Value = WorksheetFunction.Max(Range("L1", "L" & last_row))
+                            Range("P4").Select
+                                Selection.Style = "Comma"
+                                Selection.NumberFormat = "_(* #,##0.0_);_(* (#,##0.0);_(* ""-""??_);_(@_)"
+                                Selection.NumberFormat = "_(* #,##0_);_(* (#,##0);_(* ""-""??_);_(@_)"
+                                
+            Range("o4").Value = WorksheetFunction.XLookup(Range("P4"), Range("L1:L" & last_row), Range("i1:i" & last_row))
+        
+Next sh
+
+
+End Sub
